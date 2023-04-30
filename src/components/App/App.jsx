@@ -10,6 +10,7 @@ import { ContactList } from '../ContactList/ContactList';
 import { Section } from '../Section/Section';
 import { ContactFilter } from '../ContactFilter/ContactFilter';
 
+//setting for toastify
 const toastSettings = {
   position: 'top-center',
   autoClose: 2000,
@@ -21,19 +22,41 @@ const toastSettings = {
   theme: 'light',
 };
 
+// initial contacts
+const INITIAL_CONTACTS = [
+  { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
+  { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
+  { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
+  { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
+];
+
 export class App extends Component {
   state = {
-    contacts: [
-      // { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-      // { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-      // { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-      // { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-    ],
+    contacts: [],
     filter: '',
   };
 
   notify = data => toast.warn(`${data} is already in contacts`, toastSettings);
 
+  // checking local storage for saved contacts
+  componentDidMount() {
+    const savedContacts = localStorage.getItem(`contacts`);
+    const parsedContacts = JSON.parse(savedContacts);
+
+    if (!savedContacts) {
+      this.setState({ contacts: INITIAL_CONTACTS });
+    } else {
+      this.setState({ contacts: parsedContacts });
+    }
+  }
+
+  // updating local storage if contacts are changed
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.contacts !== this.state.contacts) {
+      localStorage.setItem(`contacts`, JSON.stringify(this.state.contacts));
+    }
+  }
+  // adding new contact to the list
   addContact = newContact => {
     this.state.contacts.some(
       contact =>
@@ -47,6 +70,7 @@ export class App extends Component {
         }));
   };
 
+  //deleting contact from the list
   deleteContact = expiredContact => {
     this.setState(prevState => ({
       contacts: prevState.contacts.filter(
@@ -55,6 +79,7 @@ export class App extends Component {
     }));
   };
 
+  //filtering contacts by name
   changeFilter = event => {
     this.setState({ filter: event.target.value });
   };
